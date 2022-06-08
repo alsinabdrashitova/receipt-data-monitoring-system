@@ -1,0 +1,152 @@
+body {
+    font-family: "Lato", sans-serif;
+    margin: 0;
+    background-color: #F7F7F7;
+}
+
+.header {
+    background-color: #222222;
+    height: 288px;
+    padding: 16px 0 0 0;
+}
+
+.header-emoji {
+    font-size: 48px;
+    margin: 0 auto;
+    text-align: center;
+}
+
+.header-title {
+    color: #FFFFFF;
+    font-size: 48px;
+    font-weight: bold;
+    text-align: center;
+    margin: 0 auto;
+}
+.header-description {
+    color: #CFCFCF;
+    margin: 4px auto;
+    text-align: center;
+    max-width: 384px;
+}
+
+.wrapper {
+    flex-wrap: wrap;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-evenly;
+}
+
+.card {
+    margin-bottom: 12px;
+    box-shadow: 0 4px 6px 0 rgba(0, 0, 0, 0.18);
+}
+
+.menu-selects {
+    display: flex;
+    justify-content: space-around;
+}
+
+.city-selects {
+    margin: 20px;
+}
+
+.menu {
+    height: 300px;
+    width: 912px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-evenly;
+    padding-top: 24px;
+    margin: -80px auto 16px auto;
+    background-color: #FFFFFF;
+    box-shadow: 0 4px 6px 0 rgba(0, 0, 0, 0.18);
+}
+
+.Select-control {
+    width: 256px;
+    height: 48px;
+}
+
+.city-selects > .Select-control{
+    width: 500px;
+}
+
+.Select--single > .Select-control .Select-value, .Select-placeholder {
+    line-height: 48px;
+}
+
+.Select--multi .Select-value-label {
+    line-height: 32px;
+}
+
+.menu-title {
+    margin-bottom: 6px;
+    font-weight: bold;
+    color: #079A82;
+}
+
+.custom-control-label::after,
+.custom-control-label::before {
+  display: none;
+}
+
+.custom-control {
+  padding-left: 0;
+}
+
+.custom-control-inline {
+  margin-right: 0;
+}
+
+.date-group-labels {
+    color: #079A82;
+  border: 1px solid #ffffff;
+  border-radius:5px;
+  font: bold 15px Roboto, sans-serif;
+  padding: 10px 10px;
+  background-image: -webkit-linear-gradient(top, #fefefe, #ffffff);
+  background-image: -moz-linear-gradient(top, #fefefe, #ffffff);
+  cursor: pointer;
+}
+
+.date-group-items {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+input[type=radio]{
+    accent-color: black;
+}
+
+.date-group-labels.date-group-labels-checked {
+    color: #222222;
+  background-image: -webkit-linear-gradient(top, #eee, #ffffff);
+  background-image: -moz-linear-gradient(top, #eee, #ffffff);
+  box-shadow: inset 0px 1px 2px rgb(7, 154, 130);
+}
+
+.custom-radio:first-child .date-group-labels {
+  border-radius: 10px 0 0 10px;
+}
+
+.custom-radio:last-child .date-group-labels {
+  border-radius: 0 10px 10px 0;
+}
+
+.custom-radio:not(:last-child) .date-group-labels {
+  border-right: none;
+}
+
+.date-group-labels:hover {
+  box-shadow: inset 0px 1px 2px rgb(7, 154, 130);
+}
+
+.wrapper-page {
+    display: flex;
+    flex-wrap: wrap;
+    flex-direction: row;
+    align-content: center;
+    justify-content: space-evenly;
+}
