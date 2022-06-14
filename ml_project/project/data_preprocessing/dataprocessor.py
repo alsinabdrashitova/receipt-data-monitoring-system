@@ -4,106 +4,115 @@ import string
 import numpy as np
 import csv
 from io import StringIO
-
+import re
 from sqlalchemy import create_engine
 
 import warnings
 warnings.simplefilter(action='ignore', category=FutureWarning)
 
 
-def to_delete(df):
-    df['items.name'] = df['items.name'].str.lower()
+def selected_brands(str):
+    results = {}
+    with open('project/data/brands_7841.txt', encoding = 'utf-8') as file:
+        f = file.read()
+        f = f.lower()
+        f = f.split('\n')
+        data_map = {}
+        for line in f:
+            l = line.split(' ')
+            arr = data_map.get(l[0], [])
+            arr.append(line)
+            data_map[l[0]] = arr
 
-    toDelete = (df['items.name'].str.contains('электро') == False) & (
-            df['items.name'].str.contains('проезд') == False) & (df['items.name'].str.contains('игры') == False) & (
-                       df['items.name'].str.contains('домен') == False) & (
-                       df['items.name'].str.contains('гвс') == False) & (
-                       df['items.name'].str.contains('перевозка') == False) & (
-                       df['items.name'].str.contains('кпг') == False) & (
-                       df['items.name'].str.contains('лицензи') == False) & (
-                       df['items.name'].str.contains('тко') == False) & (
-                       df['items.name'].str.contains('поездк') == False) & (
-                       df['items.name'].str.contains('подписк') == False) & (
-                       df['items.name'].str.contains('жку') == False) & (
-                       df['items.name'].str.contains('билет') == False) & (
-                       df['items.name'].str.contains('ремень') == False) & (
-                       df['items.name'].str.contains('24 часа') == False) & (
-                       df['items.name'].str.contains('бензин') == False) & (
-                       df['items.name'].str.contains('аи-9') == False) & (
-                       df['items.name'].str.contains('наушники') == False) & (
-                       df['items.name'].str.contains('русское издание') == False) & (
-                       df['items.name'].str.contains('колодки') == False) & (
-                       df['items.name'].str.contains('рулевая') == False) & (
-                       df['items.name'].str.contains('аб раб на') == False) & (
-                       df['items.name'].str.contains('бик мак') == False) & (
-                       df['items.name'].str.contains('бизнес стандарт') == False) & (
-                       df['items.name'].str.contains('бургер') == False) & (
-                       df['items.name'].str.contains('водоотведение') == False) & (
-                       df['items.name'].str.contains('тара') == False) & (
-                       df['items.name'].str.contains('дт-') == False) & (
-                       df['items.name'].str.contains('звезды') == False) & (
-                       df['items.name'].str.contains('платёж') == False) & (
-                       df['items.name'].str.contains('кошелек') == False) & (
-                       df['items.name'].str.contains('нап. ср.') == False) & (
-                       df['items.name'].str.contains('отопление') == False) & (
-                       df['items.name'].str.contains('позиция') == False) & (
-                       df['items.name'].str.contains('пополнение') == False) & (
-                       df['items.name'].str.contains('ставк') == False) & (
-                       df['items.name'].str.contains('приход') == False) & (
-                       df['items.name'].str.contains('багаж') == False) & (
-                       df['items.name'].str.contains('разовый') == False) & (
-                       df['items.name'].str.contains('спорт') == False) & (
-                       df['items.name'].str.contains('суг') == False) & (
-                       df['items.name'].str.contains('товар') == False) & (
-                       df['items.name'].str.contains('трк') == False) & (
-                       df['items.name'].str.contains('удержание') == False) & (
-                       df['items.name'].str.contains('виагра') == False) & (
-                       df['items.name'].str.contains('услуг') == False)
-    df = df[toDelete]
+    def get_line_brand(line_arr, str_l):
+        for word in line_arr:
+            r = data_map.get(word, False)
+            if r:
+                for br in r:
+                    if br in str_l:
+                        return br
 
-    df = df.sort_values(by='items.name')
-    df = df.iloc[2:]
-
-    df['items.name'] = df['items.name'].replace(r'[{}]'.format(string.punctuation), '', regex=True)
-    df['items.name'] = df['items.name'].str.replace('\d+', '')
-
-    return df
+    arr = str
+    result = []
+    for line in arr:
+        str_line = ' '.join(line)
+        brand = get_line_brand(line, str_line)
+        if brand:
+            new_line = ' '.join(str_line.split(brand))
+            new_line = new_line.replace('  ', ' ').strip()
+            result.append([new_line, brand])
+        else:
+            result.append([str_line, 'не определено'])
+    return result
 
 
-def word_delete(df):
-    i = 0
-    list_of_sentance = []
-    for sentance in df['items.name'].to_numpy():
-        list_of_sentance.append(sentance.split())
-
-    new_table = []
-    for line in list_of_sentance:
-        new_line = []
-        for word in line:
-            if len(word) > 2:
-                new_line.append(word)
-        new_table.append(' '.join(new_line))
-
-    data = pd.DataFrame(new_table, columns=['items.name'])
-    data['items.price'] = pd.Series(df['items.price'].to_numpy())
-    data['items.quantity'] = pd.Series(df['items.quantity'].to_numpy())
-
-    return data
+def make_trans():
+    a = 'a b c d e f g h i j k l m n o p q r s t u v w x y z ё'.split()
+    b = 'а в с д е ф г н и ж к л м н о п к р с т у в в х у з е'.split()
+    trans_dict = dict(zip(a, b))
+    trans_table = ''.join(a).maketrans(trans_dict)
+    return trans_table
 
 
-def price_formatting(df):
-    for index, price in enumerate(list(df['items.price'])):
-        df.loc[index, 'items.price'] = float(int(price) / 100)
+def normalize(ser: pd.Series):
+#   "СокДобрый" -> "Сок Добрый"
+    camel_case_pat = re.compile(r'([а-яa-z])([А-ЯA-Z])')
+#   "lmno" -> "лмно"
+    trans_table = make_trans()
+#   "15 мл" -> "15мл"
+    unit = 'мг|г|гр|кг|мл|л|шт'
+    unit_pat = re.compile(fr'((?:\d+p)?\d+)\s*({unit})\b')
+#   "ж/б ст/б" -> "жб стб"
+    w_w_pat = re.compile(r'\b([а-я]{1,2})/([а-я]{1,2})\b')
 
-    return df
+
+    return ser \
+            .str.replace(camel_case_pat, r'\1 \2') \
+            .str.lower() \
+            .str.translate(trans_table) \
+            .str.replace(unit_pat, r' \1\2 ') \
+            .str.replace(w_w_pat, r' \1\2 ')
 
 
-def data_generation(df, count):
-    new_df = df.copy()
-    for i in range(count):
-        new_df = new_df.append(df.sample())
+def data_extraction(product_name):
+    value1 = []
+    vol = []
+    for i in product_name:
+        char = re.findall('(\d+)(кг|г|гр|к|л|мл|мг)', i)
+        if char:
+            value1.append(char)
+        else:
+            value1.append(['', ''])
+    for i in value1:
+        vol.append(i[0])
 
-    return new_df
+    value1 = []
+    count = []
+    for i in product_name:
+        char = re.findall('(\d+)(шт)', i)
+        if char:
+            #       a = char.group(1)
+            value1.append(char)
+        else:
+            value1.append([''])
+    for i in value1:
+        count.append(i[0])
+
+    value2 = []
+    percent = []
+    for i in product_name:
+        char = re.findall('(\d+|\d+.\d+)(%)', i)
+        if char:
+            #       a = char.group(1)
+            value2.append(char)
+        else:
+            value2.append(['', ''])
+    for i in value2:
+        percent.append(i[0])
+    print(vol)
+    print(count)
+    print(percent)
+    return vol, count, percent
 
 
 def psql_insert_copy(table, conn, keys, data_iter):
@@ -127,24 +136,72 @@ def psql_insert_copy(table, conn, keys, data_iter):
 
 
 if __name__ == '__main__':
-    data = pd.read_csv('project/data/data_minprom.csv', delimiter=',',
-                       names=['receiptCode', 'fiscalDocumentNumber', 'dateTime', 'shiftNumber', 'requestNumber',
-                              'operationType', 'totalSum', 'items.name', 'items.price', 'items.quantity', 'items.sum',
-                              'items.ndsNo', 'cashTotalSum', 'ecashTotalSum', 'taxationType', 'ndsNo'])
+    data = pd.read_csv('project/data/train.csv')
+    # data = pd.read_csv('train.csv')
+    data['items.name'] = data['name']
+    data = data.dropna()
+    name = data['name'].to_numpy()
+    price = data['price'].to_numpy()
+    count = data['count'].to_numpy()
+    items_name = data['items.name'].to_numpy()
 
+    data['items.name'] = data['items.name'].str.lower()
+    data['items.name'] = data['items.name'].str.replace('.', ' ')
+    data['items.name'] = data['items.name'].str.replace('/', ' ')
+    nmp = data['items.name'].to_numpy()
+    list_of_sentance = []
+    for sentance in nmp:
+        list_of_sentance.append(sentance.split())
+    for name in [data]:
+        name['items.name'] = normalize(name['items.name'])
+    brands = selected_brands(list_of_sentance)
+    df_brands = pd.DataFrame(brands, columns=['names', 'brand'])
+    data['brand'] = df_brands['brand']
+
+    vol, count, percent = data_extraction(items_name)
+    print(vol)
+    vol = pd.DataFrame(vol, columns=['volume', 'единица'])
+    data['volume'] = vol['volume']
+
+    new = pd.DataFrame(count, columns=['count'])
+    new['count'] = new['count'].astype(str)
+    new['count'] = new['count'].replace(r'[{}]'.format(string.punctuation), '', regex=True)
+    data['quantity'] = new['count']
+
+    percent = pd.DataFrame(percent, columns=['Процент'])
+    percent['Процент'] = percent['Процент'].astype(str)
+    percent['Процент'] = percent['Процент'].replace(r'[{}]'.format(string.punctuation), '', regex=True)
+    data['percent'] = percent['Процент']
+    data['percent'] = data['percent'].str.replace(' ', ',')
+    data['percent'] = data['percent'].str.replace('-', ',')
+
+    data = data.fillna(0)
+    data['items.name'] = data['items.name'].str.replace('\d+', '')
+    data['items.name'] = data['items.name'].replace(r'[{}]'.format(string.punctuation), '', regex=True)
+    data['items.name'] = data['items.name'].apply(lambda x: re.sub(' +', ' ', str(x)))
+
+    nmp = data['items.name'].to_numpy()
+    list_of_sentance = []
+    for sentance in nmp:
+        list_of_sentance.append(sentance.split())
+    new_table = []
+    for line in list_of_sentance:
+        new_line = []
+        for word in line:
+            if len(word) > 2:
+                new_line.append(word)
+        new_table.append(' '.join(new_line))
+
+    data.drop(columns=['items.name'], axis=1)
+    data['items.name'] = pd.DataFrame(new_table)
+    data = data.sort_values(by='items.name')
     data = data.drop(
-        ['receiptCode', 'fiscalDocumentNumber', 'dateTime', 'shiftNumber', 'requestNumber', 'operationType', 'totalSum',
-         'items.sum', 'items.ndsNo', 'cashTotalSum', 'ecashTotalSum', 'taxationType', 'ndsNo'], axis=1)
+        labels=[2852, 69, 70, 71, 72, 73, 74, 9116, 9018, 9017, 9016, 9015, 9014, 3083, 11714, 10563, 2990, 1041, 9779,
+                2280, 8361, 12436, 1968, 12511, 11801, 1673, 1343], axis=0)
 
-    data = pd.DataFrame(data)
-    data = to_delete(data)
-    data = word_delete(data)
-    data = price_formatting(data)
-    data = data_generation(data, 5000)
 
     engine = create_engine("postgresql://db:123456@postgres:5432/db")
     sql = 'DROP TABLE IF EXISTS mlflow_clope;'
     engine.execute(sql)
     data.to_sql('mlflow_clope', engine, method=psql_insert_copy)
-
     print(data)

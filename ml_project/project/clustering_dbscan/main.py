@@ -64,12 +64,10 @@ def psql_insert_copy(table, conn, keys, data_iter):
 
 if __name__ == "__main__":
 
-    data = pd.DataFrame(data=db_connection(), columns=['ind', 'items.name', 'items.price', 'items.quantity' ])
+    data = pd.DataFrame(data=db_connection())
     data = data.iloc[:, 1:]
 
-    name = data.drop(['items.price', 'items.quantity'], axis=1)
-
-    nmp = name['items.name'].to_numpy()
+    nmp = data['items.name'].to_numpy()
 
     model_vect = TfidfVectorizer()
     tf_idf_matrix = model_vect.fit_transform(nmp)
@@ -85,7 +83,7 @@ if __name__ == "__main__":
     min_samples = int(args.min_samples)
 
     mlflow.set_tracking_uri("http://mlflow:5000")
-    mlflow.set_experiment('clustering')
+    mlflow.set_experiment('clustering_dbscan')
 
     with mlflow.start_run():
         if not os.path.exists("outputs"):
@@ -102,7 +100,7 @@ if __name__ == "__main__":
 
         data['cluster'] = pd.Series(labels)
 
-        data.to_csv('outputs/data_markup_dbscan.csv')
+        data.to_excel('outputs/data_markup_dbscan.xlsx')
         log_artifacts('outputs')
 
         mlflow.sklearn.log_model(sk_model=db_default, artifact_path="output", registered_model_name='dbscan')

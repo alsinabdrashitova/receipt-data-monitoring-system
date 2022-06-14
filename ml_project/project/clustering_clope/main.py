@@ -62,7 +62,7 @@ def get_clusters(tr, clust):
 
     clope_data = pd.DataFrame(cl, columns=['name'])
     clope_data['clusters_count'] = pd.Series(cl1)
-    clope_data = clope_data.sort_values(by='name')
+   # clope_data = clope_data.sort_values(by='name')
 
     return clope_data
 
@@ -89,16 +89,15 @@ def psql_insert_copy(table, conn, keys, data_iter):
 
 if __name__ == "__main__":
 
-    data = pd.DataFrame(data=db_connection(), columns=['ind', 'items.name', 'items.price', 'items.quantity' ])
+    data = pd.DataFrame(data=db_connection())
     data = data.iloc[:, 1:]
 
     print(data)
     # data = pd.read_csv('clustering_clope/data - data kika.csv', delimiter=';',
     #                    names=['items.name', 'items.price', 'items.quantity'])
 
-    name = data.drop(['items.price', 'items.quantity'], axis=1)
 
-    nmp = name['items.name'].to_numpy()
+    nmp = data['items.name'].to_numpy()
 
     i = 0
     list_of_sentance = []
@@ -120,12 +119,12 @@ if __name__ == "__main__":
     r = float(args.r)
 
     mlflow.set_tracking_uri("http://mlflow:5000")
-    mlflow.set_experiment('clustering')
+    mlflow.set_experiment('clustering_clope')
 
     with mlflow.start_run():
         if not os.path.exists("outputs"):
             os.makedirs("outputs")
-        data.to_csv('outputs/data.csv')
+        data.to_excel('outputs/data_extraction.xlsx')
 
         log_param("noiseLimit", noiseLimit)
         log_param("seed", seed)
@@ -141,12 +140,9 @@ if __name__ == "__main__":
         print("Success")
 
         new_data = get_clusters(clope.transaction, clope)
-        data = data.sort_values(by='items.name')
-        new_data['price'] = data['items.price']
-        new_data['quantity'] = data['items.quantity']
         print(new_data)
 
-        new_data.to_csv('outputs/data_markup.csv')
+        new_data.to_excel('outputs/data_markup.xlsx')
         log_artifacts('outputs')
 
         mlflow.sklearn.log_model(sk_model=clope, artifact_path="output", registered_model_name='clope')
