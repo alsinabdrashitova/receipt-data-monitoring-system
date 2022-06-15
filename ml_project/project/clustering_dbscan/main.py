@@ -67,7 +67,8 @@ if __name__ == "__main__":
     data = pd.DataFrame(data=db_connection())
     data = data.iloc[:, 1:]
 
-    nmp = data['items.name'].to_numpy()
+    # nmp = data['items.name'].to_numpy()
+    nmp = data.iloc[:, 6].to_numpy()
 
     model_vect = TfidfVectorizer()
     tf_idf_matrix = model_vect.fit_transform(nmp)

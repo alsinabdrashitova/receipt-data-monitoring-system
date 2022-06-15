@@ -97,7 +97,8 @@ if __name__ == "__main__":
     #                    names=['items.name', 'items.price', 'items.quantity'])
 
 
-    nmp = data['items.name'].to_numpy()
+    # nmp = data['items.name'].to_numpy()
+    nmp = data.iloc[:, 6].to_numpy()
 
     i = 0
     list_of_sentance = []

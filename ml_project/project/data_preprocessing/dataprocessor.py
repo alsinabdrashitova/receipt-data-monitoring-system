@@ -1,14 +1,31 @@
 # -*- coding: utf-8 -*-
 import pandas as pd
 import string
-import numpy as np
-import csv
 from io import StringIO
 import re
 from sqlalchemy import create_engine
-
+import csv
+import json
+from pprint import pprint
 import warnings
 warnings.simplefilter(action='ignore', category=FutureWarning)
+
+
+def parse_json(new_data):
+    text = json.loads(new_data.read())['payload'].values()
+    results = []
+    for k in text:
+        data = ['receiptCode', 'fiscalDocumentNumber', 'dateTime', 'shiftNumber', 'requestNumber', 'operationType',
+                'totalSum', 'name', 'price', 'quantity', 'sum', 'ndsNo', 'cashTotalSum',
+                'ecashTotalSum', 'taxationType', 'ndsNo']
+        k = json.loads(k)
+        pprint(k)
+        k.update(k['items'][0])
+        res = [k.get(key) for key in data]
+        # pprint(json.loads(k))
+        results.append(res)
+
+    return results
 
 
 def selected_brands(str):

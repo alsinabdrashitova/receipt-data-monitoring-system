@@ -11,7 +11,8 @@ services:
     environment:
       AWS_REGION: eu-west-3
       AWS_DEFAULT_REGION: eu-west-3
-      AWS_ACCEну а по логике еEY: adminadmin
+      AWS_ACCESS_KEY_ID: admin
+      AWS_SECRET_ACCESS_KEY: adminadmin
       MLFLOW_S3_ENDPOINT_URL: http://minio:9000
     ports:
       - "5000:5000"
